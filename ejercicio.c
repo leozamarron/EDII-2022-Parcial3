@@ -597,7 +597,7 @@ int eliminaIngre(LISTA_INGRE *li, char *ingre)
 /* Función para buscar la receta a la que pertenece el ingrediente a eliminar*/
 int eliminaIngreBuscaRece(LISTA_RECE lr, char *rece, char *ingre)
 {
-
+    
 }
 
 /* Esta función busca el tipo de receta, al que pertenece la receta del
