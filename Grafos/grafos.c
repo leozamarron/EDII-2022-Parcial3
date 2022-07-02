@@ -44,27 +44,7 @@ int main()
     
 }
 
-// Eliminación de vertice
-int eliminaVertice(GRAFO_MR *g, int vr)
-{
-    int res = 0, pos, cont;
-    for(pos = 0; vr < g->cv && vr != *(g->vecVer+pos); pos++)
-    if(pos < g->cv)
-    {
-        *(g->vecVer + pos) = *(g->vecVer + g->cv-1);
-        for (cont = 0; cont < g->cv; cont++)
-        {
-            *(*(g->matRel+pos)+cont) = *(*(g->matRel+g->cv-1)+cont);
-            *(*(g->matRel+cont)+pos) = *(*(g->matRel+cont)+g->cv-1);
-        }
-        *(*(g->matRel+pos)+pos) = *(*(g->matRel+g->cv-1)+g->cv-1);
-        g->cv--;
-        res = 1;
-    }
-    return res;
-}
-
-// Eliminación de relación
+// Elimina relación
 int eliminaRelacion(GRAFO_MR g, int vr1, int vr2)
 {
     int res = 0, col, ren;
