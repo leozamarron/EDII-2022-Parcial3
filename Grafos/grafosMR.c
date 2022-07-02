@@ -30,25 +30,64 @@ typedef struct
 {
     int nmax, cv;
     int *vecVer;
-    int **matRel; //podemos usar costo para diferentes situaciones
+    int **matRel; // Podemos usar costo para diferentes situaciones
 }GRAFO_MR;
 
 int iniGrafoMR(GRAFO_MR *g, int nm);
 int asignaMemArrBi(int ***ptrArrBi, int nr, int nc);
 int asignaMemArr(int **ptrArr, int n);
+void capturaTam(GRAFO_MR *g);
+int insVerMR(GRAFO_MR *g, int vr);
+int insRelMR(GRAFO_MR g, int vo, int vd);
+void capturaVertice(GRAFO_MR *g);
+void capturaRel(GRAFO_MR *g);
+void muestraGrafoMR(GRAFO_MR g);
 void muestraVerticeNoRels(GRAFO_MR g);
 int encuentraMasRel(GRAFO_MR g);
+int hayRelMR(GRAFO_MR g, int ver0, int verd);
+int hayRelRecMR(GRAFO_MR g, int ver0, int verd);
+void muestraReldeVertice(GRAFO_MR g, int ver);
+void muestraVerticeRel(GRAFO_MR g, int ver);
+int hayCamino3(GRAFO_MR g, int vrA, int vrB, int vrC);
+int camino3(GRAFO_MR g, int vrA, int vrB, int vrC);
+int eliminaRelacion(GRAFO_MR g, int vr1, int vr2);
+int elimVertice(GRAFO_MR *g, int vr);
 
 int main()
 {
-    
+    GRAFO_MR grafo;
+
+    capturaTam(&grafo);
+    capturaVertice(&grafo);
+    capturaRel(&grafo);
+    muestraGrafoMR(grafo);
+}
+
+// Elimina vertice
+int elimVertice(GRAFO_MR *g, int vr)
+{
+    int res = 0, cont;
+    for(cont = 0; vr < g->cv && vr != *(g->vecVer+cont); cont++);
+    if(cont < g->cv)
+    {
+        for(cont = 0; cont < g->cv; cont++)
+        {
+            *(*(g->matRel + vr) + cont) = *(*(g->matRel + g->cv-1) + cont);
+            *(*(g->matRel + cont) + vr) = *(*(g->matRel + cont) + g->cv-1);
+        }
+        *(*(g->matRel + vr) + vr) = *(*(g->matRel + g->cv-1) + g->cv-1);
+        *(g->vecVer + vr) = *(g->vecVer + g->cv-1);
+        g->cv--;
+        res = 1;
+    }
+    return res;
 }
 
 // Elimina relación
 int eliminaRelacion(GRAFO_MR g, int vr1, int vr2)
 {
     int res = 0, col, ren;
-    for(ren = 0; ren < g.cv && vr1 != *(g.vecVer+ren); ren++)
+    for(ren = 0; ren < g.cv && vr1 != *(g.vecVer+ren); ren++);
     if(ren < g.cv)
     {
         for(col = 0; col < g.cv && vr2 != *(g.vecVer+col); col++)
@@ -123,7 +162,7 @@ void muestraReldeVertice(GRAFO_MR g, int ver)
                 printf("Esta relacionado con: %d ", *(g.vecVer+col));  
 }
 
-// *Recorrido: determinar 2 vertices tienen una relación reciproca
+// *Recorrido: determinar si 2 vertices tienen una relación reciproca
 int hayRelRecMR(GRAFO_MR g, int ver0, int verd)
 {
     int ren, col, res = 0;
@@ -177,7 +216,7 @@ void muestraVerticeNoRels(GRAFO_MR g)
     {
         cont = 0;
         for(col = 0; col < g.cv; col++)
-            cont += *(*(g.matRel + ren)+ col); // nos ahorramos el if
+            cont += *(*(g.matRel + ren)+ col); // Nos ahorramos el if
         printf("%d tiene %d relaciones. \n", *(g.vecVer+ren), cont);
     }
 }
@@ -191,10 +230,26 @@ void muestraGrafoMR(GRAFO_MR g)
     {
         printf("%d:", *(g.vecVer + ren));
         for (col = 0; col < g.cv; col++)
-            if(*(*(g.matRel + ren)+col));
+            if(*(*(g.matRel + ren)+col))
                 printf("%d ", *(g.vecVer + col));
         printf("\n");
     }
+}
+
+// Captura las relaciones hasta que se introduzca un 0
+void capturaRel(GRAFO_MR *g)
+{
+    int resp, vro, vrd;
+
+    do
+    {
+        printf("Dame el vertice origen: ");
+        scanf("%d", &vro);
+        printf("Dame el vertice origen: ");
+        scanf("%d", &vrd);
+        resp = insRelMR(*g, vro, vrd);
+        resp? printf("Relacion agregada\n"):printf("Error no se pudo agregar\n");
+    } while (vro && vrd);
 }
 
 //Agrega relaciones
@@ -211,13 +266,27 @@ int insRelMR(GRAFO_MR g, int vo, int vd)
     return res;
 }
 
+// Captura el vertice hasta que se introduzca un 0
+void capturaVertice(GRAFO_MR *g)
+{
+    int resp, ver;
+
+    do
+    {
+        printf("Dame el vertice que desea agregar: ");
+        scanf("%d", &ver);
+        resp = insVerMR(g, ver);
+        resp? printf("Vertice agregado\n"):printf("Error no se pudo agregar\n");
+    } while (ver);
+}
+
 //Inserta vertices
 int insVerMR(GRAFO_MR *g, int vr)
 {
     int res = 0, i;
     if(g->nmax > g->cv)
     {
-        for(i=0; i < *g->vecVer && vr != *(g->vecVer + i); i++);
+        for(i=0; i < g->cv && vr != *(g->vecVer + i); i++);
         if (i == g->cv)
         {
             *(g->vecVer + g->cv) = vr;
@@ -228,6 +297,18 @@ int insVerMR(GRAFO_MR *g, int vr)
         }
     }
     return res;
+}
+
+// Captura el tamaño de los vertices
+void capturaTam(GRAFO_MR *g)
+{
+    int tam, res;
+
+    printf("Dame el tamaño maximo de los vertices: ");
+    scanf("%d", &tam);
+
+    res = iniGrafoMR(g, tam);
+    res? printf("Tamaño aceptado\n"):printf("Tamaño no aceptado\n");
 }
 
 //Inicializa el grafo

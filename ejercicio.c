@@ -597,32 +597,70 @@ int eliminaIngre(LISTA_INGRE *li, char *ingre)
 /* Función para buscar la receta a la que pertenece el ingrediente a eliminar*/
 int eliminaIngreBuscaRece(LISTA_RECE lr, char *rece, char *ingre)
 {
-    
+   int res = 0;
+
+   for(; lr && strcmp(lr->nomRece, rece) < 0; lr = lr->sigRece);
+   if(lr && strcmp(lr->nomRece, rece) == 0)
+      res = eliminaIngre(&lr->cabIngre, ingre);
+
+   return res;
 }
 
 /* Esta función busca el tipo de receta, al que pertenece la receta del
    ingrediente a eliminar */
 int eliminaIngrediente(RECETARIO r, char *tipo, char *rece, char *ingre)
 {
+   int res = 0;
 
+   for(; r && strcmp(r->nomTipo, rece) < 0; r->sigTipo);
+   if(r && strcmp(r->nomTipo, rece) == 0)
+      res = eliminaIngreBuscaRece(r->cabRece, rece, ingre);
+
+   return res;
 }
 
 /* Función para eliminar todos los ingredientes de una receta */
 void eliminaIngredientes(LISTA_INGRE *li)
 {
+   LISTA_INGRE aux;
 
+   while(*li)
+   {
+      aux = *li;
+      *li = aux->sigIngre;
+      free(aux);
+   }
 }
 
 /* Función para buscar una receta y poder eliminar sus ingredientes */
 int eliminaXreceta(LISTA_RECE *lr, char *rece)
 {
+   int res = 0;
+   LISTA_RECE aux;
 
+   for(aux = *lr; aux && strcmp(aux->nomRece, rece) < 0; aux = aux->sigRece);
+   if(aux && strcmp(aux->nomRece, rece) == 0)
+   {
+      eliminaIngredientes(&aux->cabIngre);
+      res = 1;
+   }
+
+   return res;
 }
 
 /* Función para buscar tipo de la receta a eliminar */
 int eliminaReceta(RECETARIO r, char *tipo, char *rece)
 {
+   int res = 0;
 
+   for(; r && strcmp(r->nomTipo, tipo) < 0; r = r->nomTipo);
+   if(r && strcmp(r->nomTipo, tipo) == 0)
+   {
+      eliminaXreceta(&r->nomTipo, rece);
+      res = 1;
+   }
+
+   return res;
 }
 
 /* Funciòn para eliminar las todas las recetas de un tipo, eliminando
@@ -630,17 +668,61 @@ int eliminaReceta(RECETARIO r, char *tipo, char *rece)
    */
 void eliminaRecetas(LISTA_RECE lr)
 {
-
+   while(lr)
+   {
+      eliminaIngredientes(&lr->cabIngre);
+      lr = lr->sigRece;
+   }
 }
 
 /* Función para eliminar un tipo de receta */
 int eliminaTipo(RECETARIO *r, char *tipo)
 {
+   int res = 0;
+   RECETARIO auxRecetario, ant;
+   LISTA_RECE auxRece;
 
+   for(auxRecetario = *r; auxRecetario && strcmp((*r)->nomTipo, tipo) < 0; ant = auxRecetario, auxRecetario = auxRecetario->sigTipo);
+   if(auxRecetario && strcmp(auxRecetario->nomTipo, tipo) == 0)
+   {
+      eliminaRecetas(auxRecetario);
+      
+      while (auxRecetario->cabRece)
+      {
+         auxRece = auxRecetario->cabRece;
+         auxRecetario->cabRece = auxRece->sigRece;
+         free(auxRece);
+      }
+
+      if(auxRecetario == *r)
+         *r = auxRecetario->sigTipo;
+      else    
+         ant->sigTipo = auxRecetario->sigTipo;
+      free(auxRecetario);
+
+      res = 1;
+   }
+
+   return res;
 }
 
 /* Función para eliminar un recetario completo */
 void eliminaRecetario(RECETARIO *r)
 {
+   LISTA_RECE auxReceta;
+   RECETARIO auxCab;
 
+   while (*r)
+   {
+      eliminaRecetas((*r)->cabRece);
+      while ((*r)->cabRece)
+      {
+         auxReceta = (*r)->cabRece;
+         (*r)->cabRece = auxReceta->sigRece;
+         free(auxReceta);
+      }
+      auxCab = *r;
+      *r = auxCab->sigTipo;
+      free(auxCab);
+   }
 }

@@ -196,3 +196,13 @@ void hayRelVer(GRAFO_EN g, int vo, int vd)
     }
     return res;
 }
+
+// Contar el número de vértices que están relacionados con todos los demás.
+int contadorVerRel(GRAFO_EN g)
+{
+    int cont = 0;
+
+    for(; g; g = g->sigVer)
+        if(g->cabRel)
+            cont++;
+}
