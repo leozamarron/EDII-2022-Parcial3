@@ -21,6 +21,13 @@ Dos tipos de grafos:
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef struct
+{
+    int nmax, cv;
+    int *vecVer;
+    int **matRel; //podemos usar costo para diferentes situaciones
+}GRAFO_MR;
+
 typedef struct nodoRel
 {
     int verRel;
@@ -32,13 +39,6 @@ typedef struct
     int ver;
     LST_REL cabRel;
 }VER;
-
-typedef struct
-{
-    int nmax, cv;
-    int *vecVer;
-    int **matRel; //podemos usar costo para diferentes situaciones
-}GRAFO_MR;
 
 typedef struct
 {

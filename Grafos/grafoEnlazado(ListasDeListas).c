@@ -15,6 +15,31 @@ typedef struct nodoVer
     struct nodoVer *sigVer;
 }*GRAFO_EN;
 
+typedef struct
+{
+    int nmax, cv;
+    int *vecVer;
+    int **matRel;
+}GRAFO_MR;
+
+typedef struct nodoRel
+{
+    int verRel;
+    struct nodoRel *sigRel;
+}*LST_REL;
+
+typedef struct
+{
+    int ver;
+    LST_REL cabRel;
+}VER;
+
+typedef struct
+{
+    int nmax, cv;
+    VER *vecVer;
+}GRAFO_VR;
+
 //-------------------------OPERACIONES BASICAS-----------------//
 /*
     **Inicialización
@@ -205,4 +230,73 @@ int contadorVerRel(GRAFO_EN g)
     for(; g; g = g->sigVer)
         if(g->cabRel)
             cont++;
+}
+
+// *"Convertir" un grafoEN a grafoMR
+int ENtoMR(GRAFO_EN g, GRAFO_MR *gMr)
+{
+    int res, cont = 0, i;
+    GRAFO_EN auxG;
+    REL auxRel;
+
+    auxG = g;
+    while (auxG)
+    {
+        cont++;
+        auxG = auxG->sigVer;
+    }
+
+    res = iniGrafoMR(gMr, cont);
+    if(res)
+    {
+        for(auxG = g; auxG; auxG = auxG->sigVer)
+            insVerMR(gMr, auxG->ver);
+        for(; g; g->sigVer)
+            for(auxRel = g->cabRel; auxRel; auxRel = auxRel->sigRel)
+                res = insRelMR(*gMr, g->ver, auxRel->verRel->ver);
+        if(!res)
+        {   
+            for(i = 0; i < cont; i++)
+                free(*(gMr->matRel + i));
+            free(gMr->matRel);
+            free(gMr->vecVer);
+        }
+    }
+    return res;
+}
+
+// Función para determinar si un grafo EN es igual a otro en formato VR, retorna 1 si es igual.
+int ENequalVR(GRAFO_EN g, GRAFO_VR gVr)
+{
+    int res, cont = 0;
+    GRAFO_EN auxG;
+    REL auxRel;
+    LST_REL cabRel;
+
+    auxG = g;
+    while (auxG)
+    {
+        cont++;
+        auxG = auxG->sigVer;
+    }
+
+    if (cont == gVr.cv)
+    {
+        for(res = 1, cont = 0, auxG = g; auxG && res; cont++, auxG = auxG->sigVer)
+            if(g->ver != (gVr.vecVer+cont)->ver)
+                res = 0;
+        if(res)
+        {
+            while (g && res)
+            {
+                cont = 0;
+                for(auxRel = g->cabRel, cabRel = (gVr.vecVer+cont)->cabRel; (auxRel || cabRel) && res; auxRel = auxRel->sigRel, cabRel = cabRel->sigRel)
+                    if(auxRel->verRel->ver != cabRel->verRel)
+                        res = 0;
+                g = g->sigVer;
+                cont++;
+            }
+        }
+    }
+    return res;
 }
