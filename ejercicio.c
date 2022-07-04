@@ -85,8 +85,12 @@ void muestraIngredientesReceta(RECETARIO r, char *tipo, char *rece);
 /* Esta función muestra el No. de receta que tiene cada tipo de receta */
 void muestraNoReceXtipo(RECETARIO r);
 
+void muestraNoRece(RECETARIO r);
+
 /* Esta función muestra el No. de ingredientes de cadad receta */
 void muestraNoIngreXrece(RECETARIO r);
+
+void muestraNoIngre(RECETARIO r);
 
 /* Esta función calcula y retorna cuantos tipos de recta tiene un recetario */
 int cuentaTipos(RECETARIO r);
@@ -144,6 +148,8 @@ int eliminaIngresBuscaReceXreceta(LISTA_RECE *lr, char *rece);
    previamente todos los ingredientes  */
 void eliminaRecetas(LISTA_RECE lr);
 
+int eliminaReceta(RECETARIO r, char *tipo, char *rece);
+
 /* Esta función elimina un tipo de receta */
 int eliminaTipo(RECETARIO *r, char *tipo);
 
@@ -156,8 +162,40 @@ int main()
 {
   /* Puede escribir a continuación el código necesario para probar sus funciones
      aunque no es necesario */ 
-     
-     
+   RECETARIO recetario;
+   char TMR[25];
+   char tipoRMI[25], nomRMI[25], cont;
+
+   iniRecetario(&recetario);
+   capturaTipos(&recetario);
+   capturaTipos(&recetario);
+   capturaRecetas(recetario);
+   capturaRecetas(recetario);
+   capturaIngredientes(recetario);
+   capturaIngredientes(recetario);
+   capturaIngredientes(recetario);
+   capturaIngredientes(recetario);
+   muestraRecetario(recetario);
+   cont = cuentaTipos(recetario);
+   printf("Numero de tipos son %d.\n", cont);
+   cont = cuentaRecetas(recetario, "Huevo");
+   printf("Numero de recetas son %d.\n", cont);
+   cont = cuentaIngredientes(recetario, "Huevo", "Frijoles");
+   printf("Numero de ingredientes son %d.\n", cont);
+   muestraNoRece(recetario);
+   muestraNoIngre(recetario);
+   encuentraTMR(recetario, TMR);
+   printf("El tipo que tiene mas recetas es %s\n", TMR);
+   encuentraRMI(recetario, tipoRMI, nomRMI);
+   printf("La receta con mas ingredientes es %s le pertence a %s\n", nomRMI, tipoRMI);
+   cont = cuentaReceIngre(recetario, "chile");
+   printf("Numero de veces que se usa un ingrediente son %d.\n", cont);
+   eliminaIngrediente(recetario, "Huevo", "Frijoles", "chile")? printf("Se elimino\n"):printf("No se elimino\n");
+   eliminaReceta(recetario, "Huevo", "Frijoles")? printf("Se elimino\n"):printf("No se elimino\n");
+   eliminaTipo(&recetario, "Huevo")? printf("Se elimino\n"):printf("No se elimino\n");
+   eliminaRecetario(&recetario);
+
+   return 0;  
  /* NO BORRAR ESTA LINEA */
 //  evaluar();    
 }
@@ -204,7 +242,7 @@ int creaNodoTipo(RECETARIO *nuevo, char *tipo)
    *nuevo = (RECETARIO)malloc(sizeof(struct nodoTipo));
    if(*nuevo)
    {
-      strcmp((*nuevo)->nomTipo, tipo);
+      strcpy((*nuevo)->nomTipo, tipo);
       (*nuevo)->cabRece = NULL;
       (*nuevo)->sigTipo = NULL;
       res = 1;
@@ -240,7 +278,7 @@ int insIngreBuscaRece(LISTA_RECE lr, char *rece, char *ingre)
 {
    int res = 0;
 
-   for(; lr && strcmp(lr->nomRece, rece) < 0; lr->sigRece);
+   for(; lr && strcmp(lr->nomRece, rece) < 0; lr = lr->sigRece);
    if(lr && strcmp(lr->nomRece, rece) == 0)
       res = insIngre(&lr->cabIngre, ingre);
 
@@ -252,7 +290,7 @@ int insIngrediente(RECETARIO r, char *tipo, char *rece, char *ingre)
 {
    int res = 0;
 
-   for(; r && strcmp(r->nomTipo, tipo) < 0; r->sigTipo);
+   for(; r && strcmp(r->nomTipo, tipo) < 0; r = r->sigTipo);
    if(r && strcmp(r->nomTipo, tipo) == 0)
       res = insIngreBuscaRece(r->cabRece, rece, ingre);
 
@@ -287,7 +325,7 @@ int insReceta(RECETARIO r, char *tipo, char *rece)
 {
    int res = 0;
 
-   for(; r && strcmp(r->nomTipo, tipo) < 0; r->sigTipo);
+   for(; r && strcmp(r->nomTipo, tipo) < 0; r = r->sigTipo);
    if(r && strcmp(r->nomTipo, tipo) == 0)
       res = insRece(&r->cabRece, rece);
 
@@ -324,7 +362,7 @@ void capturaTipos(RECETARIO *r)
    int res;
    fflush(stdin);
    printf("Dame el nombre del tipo de receta: ");
-   gets(tipo);
+   scanf("%[^\n]", tipo);
 
    res = insTipo(r, tipo);
 
@@ -336,10 +374,12 @@ void capturaRecetas(RECETARIO r)
 {
    char tipo[25];
    char rece[25];
+   fflush(stdin);
    printf("Dame el tipo de receta: ");
-   gets(tipo);
+   scanf("%[^\n]", tipo);
+   fflush(stdin);
    printf("Dame el nombre de la receta que quiera agregar: ");
-   gets(rece);
+   scanf("%[^\n]", rece);
    insReceta(r, tipo, rece);
 }
 
@@ -349,12 +389,16 @@ void capturaIngredientes(RECETARIO r)
    char tipo[25];
    char rece[25];
    char ingre[25];
+   fflush(stdin);
    printf("Dame el tipo de receta: ");
-   gets(tipo);
+   scanf("%[^\n]", tipo);
+   fflush(stdin);
    printf("Dame el nombre de la receta: ");
-   gets(rece);
+   scanf("%[^\n]", rece);
+   fflush(stdin);
    printf("Dame el nombre del ingrediente que quiera agregar: ");
-   gets(ingre);
+   scanf("%[^\n]", ingre);
+
    insIngrediente(r, tipo, rece, ingre);
 }
 
@@ -371,10 +415,11 @@ void muestraRecetario(RECETARIO r)
       while (auxReceta)
       {
          printf("La receta es: %s\n", auxReceta->nomRece);
+         auxIngrediente = auxReceta->cabIngre;
          printf("Los ingredientes de la receta son:\n");
          while (auxIngrediente)
          {
-            printf("%s\n", auxIngrediente->sigIngre);
+            printf("%s\n", auxIngrediente->nomIngre);
             auxIngrediente = auxIngrediente->sigIngre;
          }
          
@@ -412,7 +457,7 @@ int cuentaRece(LISTA_RECE lr)
 int cuentaRecetas(RECETARIO r, char *tipo)
 {
    int cont = 0;
-   for(;r && strcmp(r->nomTipo, tipo) < 0; r = r->sigTipo)
+   for(;r && strcmp(r->nomTipo, tipo) < 0; r = r->sigTipo);
    if(r && strcmp(r->nomTipo, tipo) == 0)
       cont = cuentaRece(r->cabRece);
 
@@ -423,7 +468,7 @@ int cuentaRecetas(RECETARIO r, char *tipo)
 int cuentaIngredientes(RECETARIO r, char *tipo, char *rece)
 {
    int cont = 0;
-   for(;r && strcmp(r->nomTipo, tipo) < 0; r = r->sigTipo)
+   for(;r && strcmp(r->nomTipo, tipo) < 0; r = r->sigTipo);
    if(r && strcmp(r->nomTipo, tipo) == 0)
       cont = cuentaIngreBuscaRece(r->cabRece, rece);
 
@@ -434,7 +479,7 @@ int cuentaIngredientes(RECETARIO r, char *tipo, char *rece)
 int cuentaIngreBuscaRece(LISTA_RECE lr, char *rece)
 {
    int cont = 0;
-   for(;lr && strcmp(lr->nomRece, rece) < 0; lr = lr->sigRece)
+   for(;lr && strcmp(lr->nomRece, rece) < 0; lr = lr->sigRece);
    if(lr && strcmp(lr->nomRece, rece) == 0)
       cont = cuentaIngre(lr->cabIngre);
 
@@ -470,16 +515,22 @@ void muestraNoIngre(RECETARIO r)
 {
    int cont;
    LISTA_RECE auxRec;
+   LISTA_INGRE auxIngre;
    while (r)
    {
       auxRec = r->cabRece;
-      cont = 0;
       while (auxRec)
       {
-         cont++;
+         cont = 0;
+         auxIngre = auxRec->cabIngre;
+         while (auxIngre)
+         {
+            cont++;
+            auxIngre = auxIngre->sigIngre;
+         }
+         printf("La receta %s tiene %d ingrediente(s).\n", auxRec->nomRece, cont);
          auxRec = auxRec->sigRece;
       }
-      printf("La receta %s tiene %d ingrediente(s).\n", auxRec->nomRece, cont);
       r = r->sigTipo;
    }
 }
@@ -612,8 +663,8 @@ int eliminaIngrediente(RECETARIO r, char *tipo, char *rece, char *ingre)
 {
    int res = 0;
 
-   for(; r && strcmp(r->nomTipo, rece) < 0; r->sigTipo);
-   if(r && strcmp(r->nomTipo, rece) == 0)
+   for(; r && strcmp(r->nomTipo, tipo) < 0; r = r->sigTipo);
+   if(r && strcmp(r->nomTipo, tipo) == 0)
       res = eliminaIngreBuscaRece(r->cabRece, rece, ingre);
 
    return res;
@@ -653,10 +704,10 @@ int eliminaReceta(RECETARIO r, char *tipo, char *rece)
 {
    int res = 0;
 
-   for(; r && strcmp(r->nomTipo, tipo) < 0; r = r->nomTipo);
+   for(; r && strcmp(r->nomTipo, tipo) < 0; r = r->sigTipo);
    if(r && strcmp(r->nomTipo, tipo) == 0)
    {
-      eliminaXreceta(&r->nomTipo, rece);
+      eliminaXreceta(&r->cabRece, rece);
       res = 1;
    }
 
@@ -685,7 +736,7 @@ int eliminaTipo(RECETARIO *r, char *tipo)
    for(auxRecetario = *r; auxRecetario && strcmp((*r)->nomTipo, tipo) < 0; ant = auxRecetario, auxRecetario = auxRecetario->sigTipo);
    if(auxRecetario && strcmp(auxRecetario->nomTipo, tipo) == 0)
    {
-      eliminaRecetas(auxRecetario);
+      eliminaRecetas(auxRecetario->cabRece);
       
       while (auxRecetario->cabRece)
       {

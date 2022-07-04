@@ -17,7 +17,7 @@ int main()
     dude(duda, &aux);
 
     printf("dame el nombre: ");
-    gets(duda->nombre);
+    scanf("%[^\n]", duda->nombre);
 
     printf("El nombre es %s", aux);
 
