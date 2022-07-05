@@ -222,6 +222,28 @@ void hayRelVer(GRAFO_EN g, int vo, int vd)
     return res;
 }
 
+int hayRelVerRec(GRAFO_EN g, int v1, int v2, int v3)
+{
+    int res;
+    int cont;
+    if(cont == 3)
+        res = 1;
+    else if(g->ver == v1)
+    {
+        res = hayRelVerRec(g, v2, v3, v1);
+        cont++;
+    }
+    else if(!g)
+    {
+        cont = 0;
+        res = 0;
+    }
+    else
+        res = hayRelVerRec(g->sigVer, v1, v2, v3);
+
+    return res;
+}
+
 // Contar el número de vértices que están relacionados con todos los demás.
 int contadorVerRel(GRAFO_EN g)
 {
